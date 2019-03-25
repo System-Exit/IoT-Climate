@@ -32,8 +32,8 @@ class MonitorNotifier:
         self.__database = sqlite3.connect(database)
         cursor = self.__database.cursor()
         # Create table if it doesn't exist
-        cursor.execute("CREATE TABLE IF NOT EXISTS ClimateData\
-             (time DATETIME, temperature NUMERIC, humidity NUMERIC)")
+        cursor.execute("CREATE TABLE IF NOT EXISTS ClimateData \
+            (time DATETIME, temperature NUMERIC, humidity NUMERIC)")
 
     # TODO
     # Record the current temp data into database
@@ -44,8 +44,9 @@ class MonitorNotifier:
         # Record climate information in database and send notification
         with __database:
             cursor = self.__database.cursor()
-            cursor.execute("INSERT INTO ClimateData (time, temperature, humidity)\
-                     VALUES (?, ?, ?)", ("now", __temperature, __humidity))
+            cursor.execute("INSERT INTO ClimateData (time, temperature, humidity) \
+                    VALUES (?, ?, ?)",
+                           ("now", self.__temperature, self.__humidity))
         # If out of config range, send a notification
         if self.__temperature < self.__minTemp or\
            self.__temperature > self.__maxTemp or\
@@ -62,10 +63,14 @@ class MonitorNotifier:
             cursor = self.__database.cursor()
             # Check if notification has already been sent today by checking if
             # more than one record exists that is outside of config range
-            cursor.execute("SELECT COUNT(*) FROM ClimateData WHERE\
-                 DATEPART(DAY, time) = DATEPART(DAY, now)\
-                 DATEPART(MONTH, time) = DATEPART(MONTH, now)\
-                 DATEPART(YEAR, time) = DATEPART(YEAR, now)")
+            cursor.execute("SELECT COUNT(*) FROM ClimateData WHERE \
+                DATEPART(DAY, time) = DATEPART(DAY, now) AND \
+                DATEPART(MONTH, time) = DATEPART(MONTH, now) AND \
+                DATEPART(YEAR, time) = DATEPART(YEAR, now) AND \
+                temperature < ? OR temperature > ? OR \
+                humidity < ? OR humidity > ?",
+                           (self.__minTemp, self.__maxTemp,
+                            self.__minHumid, self.__maxHumid))
 
 # Main method
 if __name__ == "__main__":
