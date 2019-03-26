@@ -30,10 +30,14 @@ class MonitorNotifier:
     def connectToDatabase(self, database):
         # Connect to database file
         self.__database = sqlite3.connect(database)
-        cursor = self.__database.cursor()
-        # Create table if it doesn't exist
-        cursor.execute("CREATE TABLE IF NOT EXISTS ClimateData \
-            (time DATETIME, temperature NUMERIC, humidity NUMERIC)")
+        with self.__database:
+            # Get cursor for database
+            cursor = self.__database.cursor()
+            # Create table if it doesn't exist
+            cursor.execute("CREATE TABLE IF NOT EXISTS ClimateData \
+                (time DATETIME, temperature NUMERIC, humidity NUMERIC)")
+            # Commit creating of table
+            self.__database.commit()
 
     # TODO
     # Record the current temp data into database
@@ -42,11 +46,14 @@ class MonitorNotifier:
         self.__temperature = sense.get_temperature()
         self.__humidity = sense.get_humidity()
         # Record climate information in database and send notification
-        with __database:
+        with self.__database:
             cursor = self.__database.cursor()
             cursor.execute("INSERT INTO ClimateData (time, temperature, humidity) \
-                    VALUES (?, ?, ?)",
-                           ("now", self.__temperature, self.__humidity))
+                            VALUES (?, ?, ?)",
+                           ("DATETIME('now')",
+                            self.__temperature,
+                            self.__humidity))
+        self.__database.commit()
         # If out of config range, send a notification
         if self.__temperature < self.__minTemp or\
            self.__temperature > self.__maxTemp or\
