@@ -80,18 +80,22 @@ class MonitorNotifier:
             # sent yet, otherwise a notification must have been sent
             if recordCount != 1:
                 return
-            # Construct pushbullet message string
+            # Construct pushbullet message strings
+            title = "Raspberry Pi climate alert"
             message = "Warning,"
             if temperature < self.__minTemp:
-                message += " temperature too low,"
+                message += " temperature is too low,"
             if temperature > self.__maxTemp:
-                message += " temperature too high,"
+                message += " temperature is too high,"
             if humidity < self.__minHumid:
-                message += " humidity too low,"
+                message += " humidity is too low,"
             if humidity > self.__maxHumid:
-                message += " humidity too high,"
+                message += " humidity is too high,"
             message = message.rstrip(',') + "."
             # Send pushbullet message
+            dataToSend = {"type": "note", "title": title, "body": message}
+
+            # TODO
 
 # Main method
 if __name__ == "__main__":
