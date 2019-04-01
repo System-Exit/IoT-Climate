@@ -94,12 +94,9 @@ class MonitorNotifier:
             # Send pushbullet message
             dataToSend = {"type": "note", "title": title, "body": message}
             data = json.dumps(dataToSend)
-            response = requests.post('https://api.pushbullet.com/v2/pushes',
-                                     data=data,
-                                     headers={'Authorization':
-                                              'Bearer %s' % ACCESS_TOKEN,
-                                              'Content-Type':
-                                              'application/json'})
+            requests.post('https://api.pushbullet.com/v2/pushes', data=data,
+                          headers={'Authorization': 'Bearer %s' % ACCESS_TOKEN,
+                                   'Content-Type': 'application/json'})
 
 # Main method
 if __name__ == "__main__":
