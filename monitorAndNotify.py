@@ -4,30 +4,30 @@ import json
 import os
 import sqlite3
 import sense_hat
-
-# Access token for sending pushbullet notifications
-ACCESS_TOKEN = ""
+import time
 
 
 # Monitor and notification class
 class MonitorNotifier:
-    def __init__(self):
+    def __init__(self, databaseName, accessToken):
         # Get sense hat access
         self.__sense = sense_hat.SenseHat()
+        # Access token for pushbullet notifications
+        self.__accessToken = accessToken
         # Load JSON config variables
         with open("config.json", "r") as jsonFile:
             config = json.load(jsonFile)
-            self.__minTemp = config["min_temperature"]
-            self.__maxTemp = config["max_temperature"]
-            self.__minHumid = config["min_humidity"]
-            self.__maxHumid = config["max_humidity"]
-        # Initialize database to be none for now
-        self.__database = None
+            self.__minTemp = float(config["min_temperature"])
+            self.__maxTemp = float(config["max_temperature"])
+            self.__minHumid = float(config["min_humidity"])
+            self.__maxHumid = float(config["max_humidity"])
+        # Connect to database for logging climate data
+        self.__connectToDatabase(databaseName)
 
-    # Connects to database if it exists, otherwise creating one
-    def connectToDatabase(self, database):
+    # Connects to climate database if it exists, otherwise creating one
+    def __connectToDatabase(self, databaseName):
         # Connect to database file
-        self.__database = sqlite3.connect(database)
+        self.__database = sqlite3.connect(databaseName)
         with self.__database:
             # Get cursor for database
             cursor = self.__database.cursor()
@@ -40,15 +40,15 @@ class MonitorNotifier:
     # Record the current temp data into database
     def recordClimate(self):
         # Update current climate information
-        temperature = sense.get_temperature()
-        humidity = sense.get_humidity()
+        # TODO make readings more accurate, perhaps put in own methods
+        temperature = self.__sense.get_temperature()
+        humidity = self.__sense.get_humidity()
         # Record climate information in database and send notification
         with self.__database:
             cursor = self.__database.cursor()
             cursor.execute("INSERT INTO ClimateData (time, temperature, humidity) \
-                            VALUES (?, ?, ?)",
-                           ("DATETIME('now')",
-                            temperature,
+                            VALUES (DATETIME('now'), ?, ?)",
+                           (temperature,
                             humidity))
         self.__database.commit()
         # Check if notification sould be sent
@@ -66,7 +66,7 @@ class MonitorNotifier:
             # Check if notification has already been sent today by
             # checking if more than one record exists that is outside of
             # config range
-            with __database:
+            with self.__database:
                 cursor = self.__database.cursor()
                 cursor.execute("SELECT COUNT(*) FROM ClimateData WHERE \
                     DATE(time) = DATE(DATETIME('now')) AND \
@@ -95,17 +95,19 @@ class MonitorNotifier:
             dataToSend = {"type": "note", "title": title, "body": message}
             data = json.dumps(dataToSend)
             requests.post('https://api.pushbullet.com/v2/pushes', data=data,
-                          headers={'Authorization': 'Bearer %s' % ACCESS_TOKEN,
-                                   'Content-Type': 'application/json'})
+                          headers={
+                              'Authorization': 'Bearer %s' %
+                              self.__accessToken,
+                              'Content-Type': 'application/json'})
 
 # Main method
 if __name__ == "__main__":
+    # Database name and access token variables
+    databaseName = "climate_data.db"
+    accessToken = "o.CJzPeiaHZM0Vz9cOTo7gj5On8T15QkSo"
     # Initialize monitor class
-    monitor = MonitorNotifier()
-    # Placeholder database name TODO
-    database = "climate_data"
+    monitor = MonitorNotifier(databaseName, accessToken)
     # Check climate conditions every minute
     while True:
-        monitor.connectToDatabase(database)
         monitor.recordClimate()
         time.sleep(60)
