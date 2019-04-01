@@ -56,7 +56,6 @@ class MonitorNotifier:
         # End of function
         return
 
-    # TODO
     # Sends a pushbullet notification if temperature is out of range
     # and a notification has not already been sent today
     def __checkAndNotify(self, temperature, humidity):
@@ -94,9 +93,22 @@ class MonitorNotifier:
             message = message.rstrip(',') + "."
             # Send pushbullet message
             dataToSend = {"type": "note", "title": title, "body": message}
-
-            # TODO
+            data = json.dumps(dataToSend)
+            response = requests.post('https://api.pushbullet.com/v2/pushes',
+                                     data=data,
+                                     headers={'Authorization':
+                                              'Bearer %s' % ACCESS_TOKEN,
+                                              'Content-Type':
+                                              'application/json'})
 
 # Main method
 if __name__ == "__main__":
-    pass
+    # Initialize monitor class
+    monitor = MonitorNotifier()
+    # Placeholder database name TODO
+    database = "climate_data"
+    # Check climate conditions every minute
+    while True:
+        monitor.connectToDatabase(database)
+        monitor.recordClimate()
+        time.sleep(60)
