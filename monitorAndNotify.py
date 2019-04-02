@@ -47,9 +47,8 @@ class MonitorNotifier:
         with self.__database:
             cursor = self.__database.cursor()
             cursor.execute("INSERT INTO ClimateData (time, temperature, humidity) \
-                            VALUES (DATETIME('now'), ?, ?)",
-                           (temperature,
-                            humidity))
+                            VALUES (DATETIME('now', 'localtime'), ?, ?)",
+                           (temperature, humidity))
         self.__database.commit()
         # Check if notification sould be sent
         self.__checkAndNotify(temperature, humidity)
