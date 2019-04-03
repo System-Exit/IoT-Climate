@@ -22,7 +22,9 @@ class BluetoothNotifier:
             self.__minHumid = float(config["min_humidity"])
             self.__maxHumid = float(config["max_humidity"])
 
-    # Connects to device
+    # Checks if a paired device is nearby, returning true if so
+    # Note: Avoids the use of bt-device to get paired devices
+    #       Gets paired devices from bluetooth directory instead
     def checkIfPairedDeviceNearby(self):
         # Get controller addresses and put them into a list
         lsResult = str(subprocess.run(["sudo", "ls", "/var/lib/bluetooth/"],
@@ -32,15 +34,17 @@ class BluetoothNotifier:
         # Get all paired devices for each controller
         devices = []
         for ctrl in controllers:
-            lsResult = str(subprocess.run(["sudo", "ls",
-                                           "/var/lib/bluetooth/%s" % ctrl],
-                                          stdout=subprocess.PIPE).stdout)
+            # Gets the devices from the controller directory
+            lsResult = str(subprocess.run(
+                ["sudo", "ls", "/var/lib/bluetooth/%s" % ctrl],
+                stdout=subprocess.PIPE).stdout)
+            # Adds all devices to the devices list
             devices.extend(lsResult.replace("b", "")
                            .replace("\\n", " ").replace("'", "").split())
 
         # Get all nearby devices
         nearby_devices = bluetooth.discover_devices()
-        # Check if a paired device was nearby, returning true if so
+        # Check all nearby devices to see if a paired device is present
         for neardev in nearby_devices:
             if neardev in devices:
                 return True
