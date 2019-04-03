@@ -1,28 +1,81 @@
+import sense_hat
 import bluetooth
+import json
+import subprocess
+import requests
 
 
 # Bluetooth notification class
 class BluetoothNotifier:
     # Initialization
-    def __init__(self):
-        pass
+    def __init__(self, accessToken):
+        # Get sense hat access
+        self.__sense = sense_hat.SenseHat()
+        # Access token for pushbullet notification
+        self.__accessToken = accessToken
+        # Load JSON config variables
+        with open("config.json", "r") as jsonFile:
+            config = json.load(jsonFile)
+            self.__minTemp = float(config["min_temperature"])
+            self.__maxTemp = float(config["max_temperature"])
+            self.__minHumid = float(config["min_humidity"])
+            self.__maxHumid = float(config["max_humidity"])
 
     # Connects to device
-    def connectToDevice(self):
-        pass
+    def checkIfPairedDeviceNearby(self):
+        # Get controller addresses and put them into a list
+        lsResult = str(subprocess.run(["sudo", "ls", "/var/lib/bluetooth/"],
+                       stdout=subprocess.PIPE).stdout)
+        controllers = lsResult.replace("b", "").replace("\\n", " ")\
+            .replace("'", "").split()
+        # Get all paired devices for each controller
+        devices = []
+        for ctrl in controllers:
+            lsResult = str(subprocess.run(["sudo", "ls",
+                                           "/var/lib/bluetooth/%s" % ctrl],
+                                          stdout=subprocess.PIPE).stdout)
+            devices.extend(lsResult.replace("b", "")
+                           .replace("\\n", " ").replace("'", "").split())
+
+        # Get all nearby devices
+        nearby_devices = bluetooth.discover_devices()
+        # Check if a paired device was nearby, returning true if so
+        for neardev in nearby_devices:
+            if neardev in devices:
+                return True
+        # Return false, since no paired device was detected
+        return False
 
     # Sends notification
     def sendNotificaton(self):
-        pass
-
-    # Gets current temperature
-    def getTemp(self):
-        pass
-
-    # Gets current humidity
-    def getHumid(self):
-        pass
+        # Get temperature and humidity
+        temperature = self.__sense.get_temperature()
+        humidity = self.__sense.get_humidity()
+        # Construct pushbullet message strings
+        title = "Bluetooth climate alert"
+        message = "Temperature is %s *C, Humidity is %s%%, "\
+            % (round(temperature, 2), round(humidity, 2))
+        if temperature < self.__minTemp or temperature > self.__maxTemp\
+           or humidity < self.__minHumid or humidity > self.__maxHumid:
+            message += "climate outside expected parameters."
+        else:
+            message += "climate within expected parameters."
+        # Send pushbullet message
+        dataToSend = {"type": "note", "title": title, "body": message}
+        data = json.dumps(dataToSend)
+        requests.post('https://api.pushbullet.com/v2/pushes', data=data,
+                      headers={
+                          'Authorization': 'Bearer %s' %
+                          self.__accessToken,
+                          'Content-Type': 'application/json'})
 
 # Main method for script
 if __name__ == "__main__":
-    pass
+    # Access token variable
+    accessToken = "o.CJzPeiaHZM0Vz9cOTo7gj5On8T15QkSo"
+    # Initialize bluetooth nottifier
+    blueNotifier = BluetoothNotifier(accessToken)
+    # Check if any paired devices can be detected nearby
+    # If there are, send a notification via pushbullet
+    if(blueNotifier.checkIfPairedDeviceNearby()):
+        blueNotifier.sendNotificaton()
