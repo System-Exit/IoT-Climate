@@ -103,7 +103,7 @@ class MonitorNotifier:
 if __name__ == "__main__":
     # Database name and access token variables
     databaseName = "climate_data.db"
-    accessToken = "o.CJzPeiaHZM0Vz9cOTo7gj5On8T15QkSo"
+    accessToken = ""
     # Initialize monitor class
     monitor = MonitorNotifier(databaseName, accessToken)
     # Check climate conditions every minute

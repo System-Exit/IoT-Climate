@@ -73,7 +73,7 @@ class BluetoothNotifier:
 # Main method for script
 if __name__ == "__main__":
     # Access token variable
-    accessToken = "o.CJzPeiaHZM0Vz9cOTo7gj5On8T15QkSo"
+    accessToken = ""
     # Initialize bluetooth nottifier
     blueNotifier = BluetoothNotifier(accessToken)
     # Check if any paired devices can be detected nearby
