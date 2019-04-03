@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import sense_hat
 import bluetooth
 import json
