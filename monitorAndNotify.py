@@ -68,7 +68,7 @@ class MonitorNotifier:
             with self.__database:
                 cursor = self.__database.cursor()
                 cursor.execute("SELECT COUNT(*) FROM ClimateData WHERE \
-                    DATE(time) = DATE(DATETIME('now')) AND \
+                    DATE(time) = DATE(DATETIME('now', 'localtime')) AND \
                     temperature < ? OR temperature > ? OR \
                     humidity < ? OR humidity > ?",
                                (self.__minTemp, self.__maxTemp,
