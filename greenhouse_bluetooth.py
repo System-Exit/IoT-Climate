@@ -12,7 +12,7 @@ class BluetoothNotifier:
         pass
 
     # Sends notification
-    def sendMessage(self):
+    def sendNotificaton(self):
         pass
 
     # Gets current temperature
