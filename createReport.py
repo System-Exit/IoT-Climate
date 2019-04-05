@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
- import requests
 import json
 import os
 import sqlite3
@@ -27,8 +26,13 @@ def querydb(conn):
     rows = cur.fetchall()
  
     for row in rows:
-        # Split results into individual variables, comma delimiter (up to 5)
-        date, maxtemp, mintemp, maxhumidity, minhumidity = row.split(',',5)
+        date = row[0]
+        maxtemp = row[1]
+        mintemp = row[2]
+        maxhumid = row[3]
+        minhumid = row[4]
+        
+        #date, maxtemp, mintemp, maxhumid, minhumid = row.split(',',5)
         # temp print for debugging
         print("Date: ")
         print(date)
@@ -37,9 +41,9 @@ def querydb(conn):
         print("\nMin Temperature: ")
         print(mintemp)
         print("\nMax Humidity: ")
-        print(maxhumidity)
+        print(maxhumid)
         print("\nMin Humidity: ")
-        print(minhumidity)
+        print(minhumid)
  
  
 def main():
