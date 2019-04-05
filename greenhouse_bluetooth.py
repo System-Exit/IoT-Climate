@@ -4,6 +4,7 @@ import bluetooth
 import json
 import subprocess
 import requests
+import socket
 
 
 # Bluetooth notification class
@@ -65,6 +66,9 @@ class BluetoothNotifier:
             message += "climate outside expected parameters."
         else:
             message += "climate within expected parameters."
+        # Wait until program is able to connect to internet
+        while not self.__checkConnection():
+            time.sleep(1)
         # Send pushbullet message
         dataToSend = {"type": "note", "title": title, "body": message}
         data = json.dumps(dataToSend)
@@ -73,6 +77,20 @@ class BluetoothNotifier:
                           'Authorization': 'Bearer %s' %
                           self.__accessToken,
                           'Content-Type': 'application/json'})
+
+    # Returns true if able to connect to pushbullet api, otherwise false
+    def __checkConnection(self):
+        # Attempt connection
+        try:
+            host = socket.gethostbyname("api.pushbullet.com")
+            s = socket.create_connection()
+            s.close()
+            # Since connection was successful, return True
+            return True
+        except:
+            pass
+        # Since connection failed, return False
+        return False
 
 # Main method for script
 if __name__ == "__main__":

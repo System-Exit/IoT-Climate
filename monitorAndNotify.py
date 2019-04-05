@@ -5,6 +5,7 @@ import os
 import sqlite3
 import sense_hat
 import time
+import socket
 
 
 # Monitor and notification class
@@ -90,6 +91,9 @@ class MonitorNotifier:
             if humidity > self.__maxHumid:
                 message += " humidity is too high,"
             message = message.rstrip(',') + "."
+            # Wait until program is able to connect to internet
+            while not self.__checkConnection():
+                time.sleep(1)
             # Send pushbullet message
             dataToSend = {"type": "note", "title": title, "body": message}
             data = json.dumps(dataToSend)
@@ -98,6 +102,20 @@ class MonitorNotifier:
                               'Authorization': 'Bearer %s' %
                               self.__accessToken,
                               'Content-Type': 'application/json'})
+
+    # Returns true if able to connect to pushbullet api, otherwise false
+    def __checkConnection(self):
+        # Attempt connection
+        try:
+            host = socket.gethostbyname("api.pushbullet.com")
+            s = socket.create_connection()
+            s.close()
+            # Since connection was successful, return True
+            return True
+        except:
+            pass
+        # Since connection failed, return False
+        return False
 
 # Main method
 if __name__ == "__main__":
