@@ -33,19 +33,19 @@ class ReportCreator:
         string = ""
         # Check max temperature, adding info if out of bounds
         if rowMaxTemp > self.__maxTemp:
-            string += " %f *C above maximum temperature and"\
+            string += " %s *C above maximum temperature and"\
                         % round(rowMaxTemp - self.__maxTemp, 2)
         # Check min temperature, adding info if out of bounds
         if rowMinTemp < self.__minTemp:
-            string += " %f *C below minimum temperature and"\
+            string += " %s *C below minimum temperature and"\
                         % round(self.__minTemp - rowMinTemp, 2)
         # Check max humidity, adding info if out of bounds
         if rowMaxHumid > self.__maxHumid:
-            string += " %f%% above maximum humidity and"\
+            string += " %s%% above maximum humidity and"\
                         % round(rowMaxHumid - self.__maxHumid, 2)
         # Check min humidity, adding info if out of bounds
         if rowMinHumid < self.__minHumid:
-            string += " %f%% below minimum humidity and"\
+            string += " %s%% below minimum humidity and"\
                         % round(self.__minHumid - rowMinHumid, 2)
         # If nothing has been added to string, change it to "OK"
         # Otherwise, add "BAD: " to the start of it and remove last "and"
