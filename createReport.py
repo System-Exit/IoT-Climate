@@ -30,69 +30,34 @@ class ReportCreator:
     def __buildStatusRec(rowMaxTemp, rowMinTemp, rowMaxHumid, rowMinHumid):
         # Initialize record string
         string = ""
-        # Check max temperature
+        # Check max temperature, adding info if out of bounds
         if rowMaxTemp > self.__maxTemp:
-            string += ""
-        # Check min temperature
-        if rowMinTemp > self.__minTemp:
-            string += ""
-        # Check max humidity
+            string += " %f *C above maximum temperature and"\
+                        % round(rowMaxTemp - self.__maxTemp, 2)
+        # Check min temperature, adding info if out of bounds
+        if rowMinTemp < self.__minTemp:
+            string += " %f *C below minimum temperature and"\
+                        % round(self.__minTemp - rowMinTemp, 2)
+        # Check max humidity, adding info if out of bounds
         if rowMaxHumid > self.__maxHumid:
-            string += ""
-        # Check min humidity
-        if rowMinHumid > self.__minHumid:
-            string += ""
+            string += " %f%% above maximum humidity and"\
+                        % round(rowMaxHumid - self.__maxHumid, 2)
+        # Check min humidity, adding info if out of bounds
+        if rowMinHumid < self.__minHumid:
+            string += " %f%% below minimum humidity and"\
+                        % round(self.__minHumid - rowMinHumid, 2)
         # If nothing has been added to string, change it to "OK"
-        # Otherwise, add "BAD: " to the start of it
+        # Otherwise, add "BAD: " to the start of it and remove last "and"
         if not string:
             string = "OK"
         elif string:
-            string = "BAD:" + string
-        #
+            string = "BAD:" + string.rstrip(" and")
+        # return built string
+        return string
 
-    # Validation for Max Temp
-    def validatetmp_max(self, lim_tmp_max, maxtemp):
-        if maxtemp > lim_tmp_max:
-            # Calculate Difference (converting to string (Rounded))
-            tmpdiff_max = maxtemp-lim_tmp_max
-            return("BAD: "+str(round(tmpdiff_max, 2)) +
-                "°c above maximum temperature")
-        else:
-            return("Max Temp: OK ")
-
-    # Validation for Min Temp
-    def validatetmp_min(self, lim_tmp_min, mintemp):
-        if mintemp < lim_tmp_min:
-            # Calculate Difference (convert to string (Rounded))
-            tmpdiff_min = lim_tmp_min-mintemp
-            return("BAD: "+str(round(tmpdiff_min, 2)) +
-                "°c below minimum temperature")
-        else:
-            return("Min Temp: OK ")
-
-    # Validation for Max Humidity
-    def validatehumid_max(self, lim_hmd_max, maxhumid):
-        if maxhumid > lim_hmd_max:
-            # Calculate Difference (converting to string from int (raw percentage))
-            hmddiff_max = max-lim_hmd_max
-            return("BAD: "+str(int(hmddiff_max, 2))+"% above maximum Humidity")
-        else:
-            return("Max Humidity: OK ")
-
-    # Validation for Min Humidity
-    def validatehumid_min(self, lim_hmd_min, minhumid):
-        if minhumid < lim_hmd_min:
-            # Calculate Difference (converting to string from int (raw percentage))
-            hmddiff_min = lim_hmd_min-minhumid
-            return("BAD: "+str(round(hmddiff_min, 2)) +
-                "°c below minimum Humidity")
-        else:
-            return("Min Temp: OK ")
-
-    def querydb_and_write(self, lim_tmp_min, lim_tmp_max, lim_hmd_min, 
-                          lim_hmd_max, conn, csvname):
+    def makeReport(self, csvname):
         # Setup database
-        cur = conn.cursor()
+        cur = self.__database.cursor()
         cur.execute("SELECT strftime('%d-%m-%Y', time),\
                     MAX(temperature), \
                     MIN(temperature), \
@@ -106,54 +71,34 @@ class ReportCreator:
         # Setup csv writing
         with open(csvname, 'w') as report:
             rwriter = csv.writer(report,
-                                delimiter=',',
-                                quotechar='"',
-                                quoting=csv.QUOTE_MINIMAL)
-            rwriter.writerow(['Date',
-                            'Temperature Status: Maximum',
-                            'Temperature Status: Minumum',
-                            'Humidity Status: Maximum',
-                            'Humidity Status: Minumum'])
+                                 delimiter=',',
+                                 quotechar='"',
+                                 quoting=csv.QUOTE_MINIMAL)
+            rwriter.writerow(['Date', 'Status'])
 
-            # parse tuple into variables (all writing is in this loop too.)
+            # Parse tuple into variables and write row into file
             for row in rows:
                 date = row[0]
-                maxtemp = row[1]
-                mintemp = row[2]
-                maxhumid = row[3]
-                minhumid = row[4]
+                maxTempRes = row[1]
+                minTempRes = row[2]
+                maxHumidRes = row[3]
+                minHumidRes = row[4]
 
-                # Call validations, giving them max,mins and the limits
-                # TODO: This isnt pretty, it will write a whole new column for each
-                # validation (instead of just an OK), possible but time consuming
-                # to redo. (possibly move the return parts to here.)
-                rwriter.writerow([date,
-                                validatetmp_max(lim_tmp_max, maxtemp),
-                                validatetmp_min(lim_tmp_min, mintemp),
-                                validatehumid_max(lim_hmd_max, maxhumid),
-                                validatehumid_min(lim_hmd_min, minhumid)])
+                # Build row string and write the row to file
+                status = self.__buildStatusRec(maxTempRes,
+                                               minTempRes,
+                                               maxHumidRes,
+                                               minHumidRes)
+                rwriter.writerow([date, status])
 
-
-def main():
-    database = "climate_data.db"
-    csvname = "report.csv"
-
-    with open("config.json", "r") as jsonFile:
-        config = json.load(jsonFile)
-        lim_tmp_min = float(config["min_temperature"])
-        lim_tmp_max = float(config["max_temperature"])
-        lim_hmd_min = float(config["min_humidity"])
-        lim_hmd_max = float(config["max_humidity"])
-
-    # Create database connection, pass conn to querydb.
-    conn = create_connection(database)
-    with conn:
-        querydb_and_write(lim_tmp_min,
-                          lim_tmp_max,
-                          lim_hmd_min,
-                          lim_hmd_max,
-                          conn,
-                          csvname)
-
+# Main method
 if __name__ == '__main__':
-    main()
+    # Initialize database name and report name
+    databaseName = "climate_data.db"
+    csvName = "report.csv"
+
+    # Initialize report creator for specified climate database
+    reportMaker = ReportCreator(databaseName)
+
+    # Create report for climate database
+    reportMaker.makeReport(csvName)
