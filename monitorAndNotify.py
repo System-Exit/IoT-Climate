@@ -51,6 +51,7 @@ class MonitorNotifier:
                             VALUES (DATETIME('now', 'localtime'), ?, ?)",
                            (temperature, humidity))
         self.__database.commit()
+        print("[+] temperature, humidity", (temperature, humidity))
         # Check if notification sould be sent
         self.__checkAndNotify(temperature, humidity)
         # End of function
