@@ -19,7 +19,7 @@ class ReportCreator:
         # Connect to database for logging climate data
         self.__connectToDatabase(databaseName)
 
-    def __connectToDatabase(dbfile):
+    def __connectToDatabase(self, dbfile):
         # Connect to database, error if doesn't exist
         try:
             self.__database = sqlite3.connect(databaseName)
@@ -27,7 +27,8 @@ class ReportCreator:
             print(e)
 
     # Builds status record depending on parameters
-    def __buildStatusRec(rowMaxTemp, rowMinTemp, rowMaxHumid, rowMinHumid):
+    def __buildStatusRec(self, rowMaxTemp, rowMinTemp,
+                         rowMaxHumid, rowMinHumid):
         # Initialize record string
         string = ""
         # Check max temperature, adding info if out of bounds
