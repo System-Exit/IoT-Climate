@@ -92,6 +92,7 @@ class ReportCreator:
                                                minHumidRes)
                 rwriter.writerow([date, status])
 
+
 # Main method
 if __name__ == '__main__':
     # Initialize database name and report name

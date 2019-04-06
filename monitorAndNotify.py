@@ -118,6 +118,7 @@ class MonitorNotifier:
         # Since connection failed, return False
         return False
 
+
 # Main method
 if __name__ == "__main__":
     # Database name and access token variables
