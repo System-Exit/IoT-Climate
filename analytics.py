@@ -4,6 +4,7 @@ import os
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import pandas as pd
+import seaborn as sns
 import sqlite3
 from sqlite3 import Error
 
@@ -36,27 +37,48 @@ class GraphCreator:
         return
 
     def queryTMP(self):
-        # Setup database
+        # Check queryHMD for commenting, this is same but uses matplotlib
+        # and graphs temperature.
         cur = self.__database.cursor()
-        # Output average temperature and humidity of each day
         cur.execute("select strftime('%d-%m-%Y', time),\
                     AVG(temperature) \
                     FROM ClimateData \
                     GROUP BY strftime('%d-%m-%Y', time);")
-        # convert turples to DataFrame (easier plotting to plotly)
-        # put all data into rows tuple
-        print("Fetching Rows")
-        rows = cur.fetchall()
-        print("Loading into DataFrame")
-        # for each row, go through everything and add to equivilent dataframe.
-        df = pd.DataFrame([[ij for ij in i] for i in rows])
-        # Draw plot
-        ax = plt.gca()
-        df.rename(columns={0: 'Date', 1: 'Temperature (c)'}, inplace=True)
-        print(df)
-        df.plot(kind='line', x='Date', y='Temperature (c)', ax=ax)
-        plt.savefig('fig1.png')
 
+        rows = cur.fetchall()
+        dft = pd.DataFrame([[ij for ij in i] for i in rows])
+        ax = plt.gca()
+
+        dft.rename(columns={0: 'Date', 1: 'Temperature (c)'}, inplace=True)
+        dft.plot(kind='line', x='Date', y='Temperature (c)', ax=ax)
+
+        plt.savefig('fig1.png')
+        plt.clf()
+        plt.close()
+
+    def queryHMD(self):
+        # Initialize Database
+        cur = self.__database.cursor()
+        # Query Database to get avg humidity for each day
+        cur.execute("select strftime('%d-%m-%Y', time),\
+                    AVG(humidity) \
+                    FROM ClimateData \
+                    GROUP BY strftime('%d-%m-%Y', time);")
+        # Place all results into a tuple that pandas can handle.
+        rows = cur.fetchall()
+        sns.set(style="darkgrid")
+        # Convert from tuples to pandas dataframe.
+        dfh = pd.DataFrame([[ij for ij in i] for i in rows])
+        # Update dataframe with correct data
+        dfh.rename(columns={0: 'Date', 1: 'Humidity'}, inplace=True)
+
+        # Create the plot
+        sns.lineplot(x="Date", y="Humidity", data=dfh)
+
+        # Save the file
+        plt.savefig("fig2.png")
+        plt.clf()
+        plt.close()
 
 # Main method
 if __name__ == '__main__':
@@ -68,3 +90,4 @@ if __name__ == '__main__':
 
     # Create report for climate database
     gc.queryTMP()
+    gc.queryHMD()
