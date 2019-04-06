@@ -8,18 +8,47 @@ import csv
 
 
 class ReportCreator:
-    def __init__(self):
-        pass
+    def __init__(self, databaseName):
+        # Load JSON config variables
+        with open("config.json", "r") as jsonFile:
+            config = json.load(jsonFile)
+            self.__minTemp = float(config["min_temperature"])
+            self.__maxTemp = float(config["max_temperature"])
+            self.__minHumid = float(config["min_humidity"])
+            self.__maxHumid = float(config["max_humidity"])
+        # Connect to database for logging climate data
+        self.__connectToDatabase(databaseName)
 
-    def create_connection(dbfile):
+    def __connectToDatabase(dbfile):
         # Connect to database, error if doesn't exist
         try:
-            conn = sqlite3.connect(dbfile)
-            return conn
+            self.__database = sqlite3.connect(databaseName)
         except Error as e:
             print(e)
 
-        return None
+    # Builds status record depending on parameters
+    def __buildStatusRec(rowMaxTemp, rowMinTemp, rowMaxHumid, rowMinHumid):
+        # Initialize record string
+        string = ""
+        # Check max temperature
+        if rowMaxTemp > self.__maxTemp:
+            string += ""
+        # Check min temperature
+        if rowMinTemp > self.__minTemp:
+            string += ""
+        # Check max humidity
+        if rowMaxHumid > self.__maxHumid:
+            string += ""
+        # Check min humidity
+        if rowMinHumid > self.__minHumid:
+            string += ""
+        # If nothing has been added to string, change it to "OK"
+        # Otherwise, add "BAD: " to the start of it
+        if not string:
+            string = "OK"
+        elif string:
+            string = "BAD:" + string
+        #
 
     # Validation for Max Temp
     def validatetmp_max(self, lim_tmp_max, maxtemp):
