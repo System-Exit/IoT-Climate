@@ -92,6 +92,7 @@ class BluetoothNotifier:
         # Since connection failed, return False
         return False
 
+
 # Main method for script
 if __name__ == "__main__":
     # Access token variable
