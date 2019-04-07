@@ -97,7 +97,9 @@ class ReportCreator:
 if __name__ == '__main__':
     # Initialize database name and report name
     databaseName = "climate_data.db"
-    csvName = "report.csv"
+
+    # Get filename for report from user
+    csvName = input("Enter file name for report: ")
 
     # Initialize report creator for specified climate database
     reportMaker = ReportCreator(databaseName)
