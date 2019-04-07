@@ -1,0 +1,14 @@
+[Unit]
+Description = Weather Monitor and Notify Python Application
+After = network.target network-online.target
+Wants = network-online.target
+
+[Service]
+User=pi
+Group=pi
+ExecStart = /home/pi/Assignment1/monitor_and_notify.py
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy = default.target
