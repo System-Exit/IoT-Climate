@@ -75,6 +75,7 @@ class GraphCreator:
         plt.clf()
         plt.close()
 
+
 # Main method
 if __name__ == '__main__':
     # Initialize database name and report name
