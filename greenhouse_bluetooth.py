@@ -10,11 +10,9 @@ import socket
 # Bluetooth notification class
 class BluetoothNotifier:
     # Initialization
-    def __init__(self, accessToken):
+    def __init__(self):
         # Get sense hat access
         self.__sense = sense_hat.SenseHat()
-        # Access token for pushbullet notification
-        self.__accessToken = accessToken
         # Load JSON config variables
         with open("config.json", "r") as jsonFile:
             config = json.load(jsonFile)
@@ -22,6 +20,10 @@ class BluetoothNotifier:
             self.__maxTemp = float(config["max_temperature"])
             self.__minHumid = float(config["min_humidity"])
             self.__maxHumid = float(config["max_humidity"])
+        # Load Pushbullet access token from JSON file
+        with open("token.json", "r") as jsonFile:
+            token = json.load(jsonFile)
+            self.__accessToken = token["PB_api_token"]
 
     # Checks if a paired device is nearby, returning true if so
     # Note: Avoids the use of bt-device to get paired devices

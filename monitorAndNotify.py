@@ -10,11 +10,9 @@ import socket
 
 # Monitor and notification class
 class MonitorNotifier:
-    def __init__(self, databaseName, accessToken):
+    def __init__(self, databaseName):
         # Get sense hat access
         self.__sense = sense_hat.SenseHat()
-        # Access token for pushbullet notifications
-        self.__accessToken = accessToken
         # Load JSON config variables
         with open("config.json", "r") as jsonFile:
             config = json.load(jsonFile)
@@ -22,6 +20,10 @@ class MonitorNotifier:
             self.__maxTemp = float(config["max_temperature"])
             self.__minHumid = float(config["min_humidity"])
             self.__maxHumid = float(config["max_humidity"])
+        # Load Pushbullet access token from JSON file
+        with open("token.json", "r") as jsonFile:
+            token = json.load(jsonFile)
+            self.__accessToken = token["PB_api_token"]
         # Connect to database for logging climate data
         self.__connectToDatabase(databaseName)
 
@@ -123,9 +125,8 @@ class MonitorNotifier:
 if __name__ == "__main__":
     # Database name and access token variables
     databaseName = "climate_data.db"
-    accessToken = ""
     # Initialize monitor class
-    monitor = MonitorNotifier(databaseName, accessToken)
+    monitor = MonitorNotifier(databaseName)
     # Check climate conditions every minute
     while True:
         monitor.recordClimate()
