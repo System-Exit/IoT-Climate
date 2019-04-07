@@ -6,7 +6,6 @@ Wants = network-online.target
 [Service]
 User=pi
 Group=pi
-WorkingDirectory=/home/pi/Assignment1
 ExecStart = /home/pi/Assignment1/monitor_and_notify.py
 Restart=always
 RestartSec=30
