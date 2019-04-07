@@ -4,9 +4,9 @@ import bluetooth
 import json
 import subprocess
 import requests
-import urllib
 import time
 from pushbullet_api import PushbulletAPI
+from climate_util import ClimateUtil
 
 
 # Bluetooth notification class
@@ -69,21 +69,10 @@ class BluetoothNotifier:
         else:
             message += "climate within expected parameters."
         # Wait until program is able to connect to internet
-        while not self.__checkConnection():
+        while not ClimateUtil.checkConnection():
             time.sleep(1)
         # Send pushbullet message
         self.__pushbulletAPI.sendNotification(title, message)
-
-    # Returns true if able to connect to pushbullet api, otherwise false
-    def __checkConnection(self):
-        # Attempt connection
-        try:
-            urllib.request.urlopen("https://www.google.com")
-            # Since connection was successful, return True
-            return True
-        except:
-            # Since connection failed, return False
-            return False
 
 
 # Main method for script

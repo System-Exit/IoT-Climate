@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 import requests
 import json
-import os
 import sqlite3
 import sense_hat
 import time
-import urllib
 from pushbullet_api import PushbulletAPI
+from climate_util import ClimateUtil
 
 
 # Monitor and notification class
@@ -52,6 +51,9 @@ class MonitorNotifier:
             print("Warning: Invalid climate data recorded,\
                    stopping climate monitor")
             SystemExit()
+        # Calibate the recorded temperature
+        res = os.popen("vcgencmd measure_temp").readline()
+        float(res.replace("temp=", "").replace("'C\n", ""))
         # Record climate information in database and send notification
         with self.__database:
             cursor = self.__database.cursor()
@@ -94,7 +96,7 @@ class MonitorNotifier:
                 message += " humidity is too high,"
             message = message.rstrip(',') + "."
             # Wait until program is able to connect to internet
-            while not self.__checkConnection():
+            while not ClimateUtil.checkConnection():
                 time.sleep(1)
             # Send pushbullet message
             self.__pushbulletAPI.sendNotification(title, message)
@@ -104,17 +106,6 @@ class MonitorNotifier:
                 cursor.execute("INSERT INTO Notifications (timesent) \
                                 VALUES (DATETIME('now', 'localtime'))")
             self.__database.commit()
-
-    # Returns true if able to connect to pushbullet API, otherwise false
-    def __checkConnection(self):
-        # Attempt connection
-        try:
-            host = urllib.request.urlopen("https://www.google.com")
-            # Since connection was successful, return True
-            return True
-        except:
-            # Since connection failed, return False
-            return False
 
 
 # Main method
