@@ -4,7 +4,8 @@ import bluetooth
 import json
 import subprocess
 import requests
-import socket
+import urllib
+import time
 
 
 # Bluetooth notification class
@@ -84,23 +85,18 @@ class BluetoothNotifier:
     def __checkConnection(self):
         # Attempt connection
         try:
-            host = socket.gethostbyname("api.pushbullet.com")
-            s = socket.create_connection()
-            s.close()
+            urllib.request.urlopen("https://www.google.com")
             # Since connection was successful, return True
             return True
         except:
-            pass
-        # Since connection failed, return False
-        return False
+            # Since connection failed, return False
+            return False
 
 
 # Main method for script
 if __name__ == "__main__":
-    # Access token variable
-    accessToken = ""
     # Initialize bluetooth nottifier
-    blueNotifier = BluetoothNotifier(accessToken)
+    blueNotifier = BluetoothNotifier()
     # Check if any paired devices can be detected nearby
     # If there are, send a notification via pushbullet
     if(blueNotifier.checkIfPairedDeviceNearby()):

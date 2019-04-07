@@ -5,7 +5,7 @@ import os
 import sqlite3
 import sense_hat
 import time
-import socket
+import urllib
 
 
 # Monitor and notification class
@@ -34,9 +34,12 @@ class MonitorNotifier:
         with self.__database:
             # Get cursor for database
             cursor = self.__database.cursor()
-            # Create table if it doesn't exist
+            # Create climate data table if it doesn't exist
             cursor.execute("CREATE TABLE IF NOT EXISTS ClimateData \
                 (time DATETIME, temperature NUMERIC, humidity NUMERIC)")
+            # Create notification table if it doesn't exist
+            cursor.execute("CREATE TABLE IF NOT EXISTS Notifications \
+                (timesent DATETIME)")
             # Commit creating of table
             self.__database.commit()
 
@@ -53,7 +56,7 @@ class MonitorNotifier:
                             VALUES (DATETIME('now', 'localtime'), ?, ?)",
                            (temperature, humidity))
         self.__database.commit()
-        print("[+] temperature, humidity", (temperature, humidity))
+        # print("[+] temperature, humidity", (temperature, humidity))
         # Check if notification sould be sent
         self.__checkAndNotify(temperature, humidity)
         # End of function
@@ -66,21 +69,17 @@ class MonitorNotifier:
         # has already been sent today
         if temperature < self.__minTemp or temperature > self.__maxTemp or\
            humidity < self.__minHumid or humidity > self.__maxHumid:
-            # Check if notification has already been sent today by
-            # checking if more than one record exists that is outside of
-            # config range
+            # Check if notification has already been sent today
             with self.__database:
                 cursor = self.__database.cursor()
-                cursor.execute("SELECT COUNT(*) FROM ClimateData WHERE \
-                    DATE(time) = DATE(DATETIME('now', 'localtime')) AND \
-                    temperature < ? OR temperature > ? OR \
-                    humidity < ? OR humidity > ?",
-                               (self.__minTemp, self.__maxTemp,
-                                self.__minHumid, self.__maxHumid))
+                cursor.execute(
+                    "SELECT COUNT(*) \
+                     FROM Notifications \
+                     WHERE strftime('%d-%m-%Y', timesent) \
+                     = strftime('%d-%m-%Y', DATETIME('now', 'localtime'))")
                 recordCount = cursor.fetchone()[0]
-            # If there is only one record, a notification can't have been
-            # sent yet, otherwise a notification must have been sent
-            if recordCount != 1:
+            # If a notification has already been sent, return immediately
+            if recordCount >= 1:
                 return
             # Construct pushbullet message strings
             title = "Raspberry Pi climate alert"
@@ -105,20 +104,22 @@ class MonitorNotifier:
                               'Authorization': 'Bearer %s' %
                               self.__accessToken,
                               'Content-Type': 'application/json'})
+            # Record sending of notification
+            with self.__database:
+                cursor = self.__database.cursor()
+                cursor.execute("INSERT INTO Notifications (timesent) \
+                                VALUES (DATETIME('now', 'localtime'))")
 
     # Returns true if able to connect to pushbullet api, otherwise false
     def __checkConnection(self):
         # Attempt connection
         try:
-            host = socket.gethostbyname("api.pushbullet.com")
-            s = socket.create_connection()
-            s.close()
+            host = urllib.request.urlopen("https://www.google.com")
             # Since connection was successful, return True
             return True
         except:
-            pass
-        # Since connection failed, return False
-        return False
+            # Since connection failed, return False
+            return False
 
 
 # Main method
