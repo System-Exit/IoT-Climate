@@ -1,8 +1,8 @@
 Task d.
     a. With the data that you have, what data vis graph should be used?
     I think we should have two line graphs, one showing the average temperature 
-    (15 minute - daily average) and one of the humidity. They are simple, and
-    effective for long term weather data we're displaying.
+    (daily average) and one of the humidity. They are simple, and effective for 
+    long term weather data we're displaying.
 
     b. What should be represented in the above graph? Why?
     Temperature/Date, and Humidity/Date. That data graphed will produce a
