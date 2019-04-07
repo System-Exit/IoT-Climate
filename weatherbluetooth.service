@@ -6,7 +6,6 @@ User=pi
 Group=pi
 Type=oneshot
 ExecStart = /home/pi/Assignment1/greenhouse_bluetooth.py
-Restart = on-abort
 
 [Install]
 WantedBy = default.target
