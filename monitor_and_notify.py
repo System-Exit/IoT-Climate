@@ -21,10 +21,8 @@ class MonitorNotifier:
             self.__maxTemp = float(config["max_temperature"])
             self.__minHumid = float(config["min_humidity"])
             self.__maxHumid = float(config["max_humidity"])
-        # Load Pushbullet access token from JSON file
-        with open("token.json", "r") as jsonFile:
-            token = json.load(jsonFile)
-            self.__pushbulletAPI = PushbulletAPI(token["PB_api_token"])
+        # Load Pushbullet API access
+        self.__pushbulletAPI = PushbulletAPI()
         # Connect to database for logging climate data
         self.__connectToDatabase(databaseName)
 
@@ -104,7 +102,7 @@ class MonitorNotifier:
                 cursor.execute("INSERT INTO Notifications (timesent) \
                                 VALUES (DATETIME('now', 'localtime'))")
 
-    # Returns true if able to connect to pushbullet api, otherwise false
+    # Returns true if able to connect to pushbullet API, otherwise false
     def __checkConnection(self):
         # Attempt connection
         try:
