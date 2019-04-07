@@ -1,0 +1,4 @@
+# Ignore Visual Studio settings
+.vscode
+# Ignore api token file
+token.json

@@ -1,0 +1,11 @@
+[Unit]
+Description = Bluetooth Connectivity with Weather Monitor
+
+[Service]
+User=pi
+Group=pi
+Type=oneshot
+ExecStart = /home/pi/Assignment1/greenhouse_bluetooth.py
+
+[Install]
+WantedBy = default.target

@@ -1,0 +1,27 @@
+Task d.
+    a. With the data that you have, what data vis graph should be used?
+    I think we should have two line graphs, one showing the average temperature 
+    (daily average) and one of the humidity. They are simple, and effective for 
+    long term weather data we're displaying.
+
+    b. What should be represented in the above graph? Why?
+    Temperature/Date, and Humidity/Date. That data graphed will produce a
+    clean graph, showing the temperature and humidity over a large amount of
+    time. This is best suited as it is a constant data source being summarised
+    into an average. (Analog real world temperature into digital temperature 
+    value)
+
+    c. Python supports numerous data vis libraries, which two did you pick?
+    We picked matplotlib and Seaborn, as they are the two most popular graphing
+    libraries, as the most popular, they are also the most stable, which
+    generally means better performance, and better reliabilty, which is
+    important on embedded devices such as Internet of Things devices.
+
+
+    d. comparison of libraries used
+    At the low level of what we were doing, (creating a single graph, with 
+    one dataset) it is clear that matplotlib is the better option for creating
+    graphs in python. For the more advanced graphs, matplotlib is not as
+    efficient as Seaborn. While seaborn is slower and more 'simple' which is
+    pointless when creating a incredibly simple graph.
+    
