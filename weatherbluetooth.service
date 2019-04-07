@@ -5,6 +5,7 @@ Description = Bluetooth Connectivity with Weather Monitor
 User=pi
 Group=pi
 Type=oneshot
+WorkingDirectory=/home/pi/Assignment1
 ExecStart = /home/pi/Assignment1/greenhouse_bluetooth.py
 
 [Install]
