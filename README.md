@@ -128,14 +128,14 @@ Archive should contain:
 ## Installation of Weather Services
 
 1. Clone or download this branch. `git clone -b branchname`
-2. Create a file called `token.json` in the following format Provided below and replace `<TOKEN>` with your generated Pushbullet access token.
+2. Create a file called `token.json` in the following format provided below and replace `<TOKEN>` with your generated Pushbullet access token.
 3. Copy the systemd services. `sudo cp weathermonitor.service /etc/systemd/system/ && sudo cp weatherbluetooth.service /etc/systemd/system/`
 4. Set Owner correctly. `sudo chown root:root /etc/systemd/system/weathermonitor.service && sudo chown root:root /etc/systemd/system/weatherbluetooth.service`
 5. Set Permissions correctly `sudo chmod 644 /etc/systemd/system/weathermonitor.service && sudo chmod 644 /etc/systemd/system/weatherbluetooth.service`
 6. reload, and start services `sudo systemctl daemon-reload && sudo systemctl start weathermonitor weatherbluetooth`
 7. allow the services to start on boot. `sudo systemctl enable weathermonitor weatherbluetooth`
 
-## token.json file format
+## The "token.json" File Format
 ```json
 {
     "PB_api_token": "<TOKEN>"
