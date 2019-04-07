@@ -6,6 +6,7 @@ import subprocess
 import requests
 import urllib
 import time
+from pushbullet_api import PushbulletAPI
 
 
 # Bluetooth notification class
@@ -24,7 +25,7 @@ class BluetoothNotifier:
         # Load Pushbullet access token from JSON file
         with open("token.json", "r") as jsonFile:
             token = json.load(jsonFile)
-            self.__accessToken = token["PB_api_token"]
+            self.__pushbulletAPI = PushbulletAPI(token["PB_api_token"])
 
     # Checks if a paired device is nearby, returning true if so
     # Note: Avoids the use of bt-device to get paired devices
@@ -73,13 +74,7 @@ class BluetoothNotifier:
         while not self.__checkConnection():
             time.sleep(1)
         # Send pushbullet message
-        dataToSend = {"type": "note", "title": title, "body": message}
-        data = json.dumps(dataToSend)
-        requests.post('https://api.pushbullet.com/v2/pushes', data=data,
-                      headers={
-                          'Authorization': 'Bearer %s' %
-                          self.__accessToken,
-                          'Content-Type': 'application/json'})
+        self.__pushbulletAPI.sendNotification(title, message)
 
     # Returns true if able to connect to pushbullet api, otherwise false
     def __checkConnection(self):
