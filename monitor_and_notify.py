@@ -6,6 +6,7 @@ import sqlite3
 import sense_hat
 import time
 import urllib
+from pushbullet_api import PushbulletAPI
 
 
 # Monitor and notification class
@@ -23,7 +24,7 @@ class MonitorNotifier:
         # Load Pushbullet access token from JSON file
         with open("token.json", "r") as jsonFile:
             token = json.load(jsonFile)
-            self.__accessToken = token["PB_api_token"]
+            self.__pushbulletAPI = PushbulletAPI(token["PB_api_token"])
         # Connect to database for logging climate data
         self.__connectToDatabase(databaseName)
 
@@ -56,7 +57,6 @@ class MonitorNotifier:
                             VALUES (DATETIME('now', 'localtime'), ?, ?)",
                            (temperature, humidity))
         self.__database.commit()
-        # print("[+] temperature, humidity", (temperature, humidity))
         # Check if notification sould be sent
         self.__checkAndNotify(temperature, humidity)
         # End of function
@@ -97,13 +97,7 @@ class MonitorNotifier:
             while not self.__checkConnection():
                 time.sleep(1)
             # Send pushbullet message
-            dataToSend = {"type": "note", "title": title, "body": message}
-            data = json.dumps(dataToSend)
-            requests.post('https://api.pushbullet.com/v2/pushes', data=data,
-                          headers={
-                              'Authorization': 'Bearer %s' %
-                              self.__accessToken,
-                              'Content-Type': 'application/json'})
+            self.__pushbulletAPI.sendNotification(title, message)
             # Record sending of notification
             with self.__database:
                 cursor = self.__database.cursor()
@@ -124,7 +118,7 @@ class MonitorNotifier:
 
 # Main method
 if __name__ == "__main__":
-    # Database name and access token variables
+    # Database name variable
     databaseName = "climate_data.db"
     # Initialize monitor class
     monitor = MonitorNotifier(databaseName)
