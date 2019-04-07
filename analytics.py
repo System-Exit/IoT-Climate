@@ -31,11 +31,6 @@ class GraphCreator:
         except Error as e:
             print(e)
 
-    # Builds status record depending on parameters
-    def __buildGraph(self):
-        # TODO: Code for actually building the graph to a png
-        return
-
     def queryTMP(self):
         # Check queryHMD for commenting, this is same but uses matplotlib
         # and graphs temperature.
