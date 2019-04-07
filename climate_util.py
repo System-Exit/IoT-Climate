@@ -1,5 +1,6 @@
 import urllib
 import os
+import sense_hat
 
 
 # Class containing utility methods for multiple other classes
@@ -19,12 +20,17 @@ class ClimateUtil:
     # Get calibrated temperature
     # Reference: Week 4 Sensehat calibration example
     @staticmethod
-    def getCalibratedTemp(humidTemp, pressTemp):
+    def getCalibratedTemp(sense):
+        # Start up pressure sensor as to avoid values of 0
+        sense.get_temperature_from_pressure()
+        # Get temperature from humidity and pressure
+        htemp = sense.get_temperature_from_humidity()
+        ptemp = sense.get_temperature_from_pressure()
         # Get CPU temperature
         res = os.popen("vcgencmd measure_temp").readline()
         temp_cpu = float(res.replace("temp=", "").replace("'C\n", ""))
         # Calculate calibrated temperature
-        temp = (humidTemp + pressTemp) / 2
-        temp_calibrated = temp - (temp_cpu)
+        temp = (htemp + ptemp) / 2
+        temp_calibrated = temp - ((temp_cpu - temp) / 1.5)
         # Return calibrated temperature
         return temp_calibrated

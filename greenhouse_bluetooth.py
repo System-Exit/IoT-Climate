@@ -57,7 +57,7 @@ class BluetoothNotifier:
     # Sends notification
     def sendNotificaton(self):
         # Get temperature and humidity
-        temperature = self.__sense.get_temperature()
+        temperature = ClimateUtil.getCalibratedTemp(self.__sense)
         humidity = self.__sense.get_humidity()
         # Construct pushbullet message strings
         title = "Bluetooth climate alert"

@@ -45,15 +45,12 @@ class MonitorNotifier:
     def recordClimate(self):
         # Get and validate current climate information
         try:
-            temperature = float(self.__sense.get_temperature())
+            temperature = float(ClimateUtil.getCalibratedTemp(self.__sense))
             humidity = float(self.__sense.get_humidity())
         except ValueError:
             print("Warning: Invalid climate data recorded,\
                    stopping climate monitor")
             SystemExit()
-        # Calibate the recorded temperature
-        res = os.popen("vcgencmd measure_temp").readline()
-        float(res.replace("temp=", "").replace("'C\n", ""))
         # Record climate information in database and send notification
         with self.__database:
             cursor = self.__database.cursor()
