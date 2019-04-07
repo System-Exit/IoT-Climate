@@ -136,8 +136,9 @@ Archive should contain:
 7. allow the services to start on boot. `sudo systemctl enable weathermonitor weatherbluetooth`
 
 ## The "token.json" File Format
+
 ```json
 {
     "PB_api_token": "<TOKEN>"
 }
-``` 
+```
