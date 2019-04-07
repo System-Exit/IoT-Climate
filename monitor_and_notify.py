@@ -44,10 +44,14 @@ class MonitorNotifier:
 
     # Record the current temp data into database
     def recordClimate(self):
-        # Update current climate information
-        # TODO make readings more accurate, perhaps put in own methods
-        temperature = self.__sense.get_temperature()
-        humidity = self.__sense.get_humidity()
+        # Get and validate current climate information
+        try:
+            temperature = float(self.__sense.get_temperature())
+            humidity = float(self.__sense.get_humidity())
+        except ValueError:
+            print("Warning: Invalid climate data recorded,\
+                   stopping climate monitor")
+            SystemExit()
         # Record climate information in database and send notification
         with self.__database:
             cursor = self.__database.cursor()
@@ -57,8 +61,6 @@ class MonitorNotifier:
         self.__database.commit()
         # Check if notification sould be sent
         self.__checkAndNotify(temperature, humidity)
-        # End of function
-        return
 
     # Sends a pushbullet notification if temperature is out of range
     # and a notification has not already been sent today
@@ -101,6 +103,7 @@ class MonitorNotifier:
                 cursor = self.__database.cursor()
                 cursor.execute("INSERT INTO Notifications (timesent) \
                                 VALUES (DATETIME('now', 'localtime'))")
+            self.__database.commit()
 
     # Returns true if able to connect to pushbullet API, otherwise false
     def __checkConnection(self):
@@ -120,7 +123,7 @@ if __name__ == "__main__":
     databaseName = "climate_data.db"
     # Initialize monitor class
     monitor = MonitorNotifier(databaseName)
-    # Check climate conditions every minute
+    # Check and record climate conditions every minute
     while True:
         monitor.recordClimate()
         time.sleep(60)
